@@ -1,5 +1,5 @@
 import treys
-from .constants import HOLE_CARD_NUMBER
+from .constants import HOLE_CARD_COUNT
 
 
 class DeckManager:
@@ -8,7 +8,7 @@ class DeckManager:
         self.deck.shuffle()
 
     def deal_hole_cards(self, players):  # TODO deal starting with player left of dealer
-        for _ in range(HOLE_CARD_NUMBER):
+        for _ in range(HOLE_CARD_COUNT):
             for player in players:
                 player.hole_cards.extend(self.deck.draw(1))
 

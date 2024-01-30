@@ -4,10 +4,10 @@ import random
 
 
 class Player:
-    def __init__(self, name, is_human, stack):
+    def __init__(self, name, is_human, stack_size):
         self.name = name
         self.is_human = is_human
-        self.stack = stack
+        self.stack_size = stack_size
         self.hole_cards = []
 
         self.positions = []
@@ -18,9 +18,7 @@ class Player:
         self.hand_strength = None
 
     def is_response_needed(self, current_bet):
-        if self.action in [None, Action.POST_BLIND] or self.total_bet < current_bet:
-            return True
-        return False
+        return self.action in [None, Action.POST_BLIND] or self.total_bet < current_bet
 
     def get_available_actions(self, bets, stage):
         min_raise = 2 * bets.current - bets.last
@@ -33,36 +31,36 @@ class Player:
         if has_the_option:
             available_actions[Action.CHECK] = 0
 
-            if self.stack >= min_raise - self.total_bet:  # can afford difference
-                available_actions[Action.RAISE] = (min_raise - self.total_bet, self.stack)
+            if self.stack_size >= min_raise - self.total_bet:  # can afford difference
+                available_actions[Action.RAISE] = (min_raise - self.total_bet, self.stack_size)
             else:
-                available_actions[Action.ALL_IN] = self.stack
+                available_actions[Action.ALL_IN] = self.stack_size
 
         elif facing_bet:
             available_actions[Action.FOLD] = 0
 
-            if self.stack >= bets.current - self.total_bet:  # can afford difference
+            if self.stack_size >= bets.current - self.total_bet:  # can afford difference
                 available_actions[Action.CALL] = bets.current - self.total_bet
 
-            if self.stack >= min_raise - self.total_bet:  # can afford difference
-                available_actions[Action.RAISE] = (min_raise - self.total_bet, self.stack)
+            if self.stack_size >= min_raise - self.total_bet:  # can afford difference
+                available_actions[Action.RAISE] = (min_raise - self.total_bet, self.stack_size)
             else:
-                available_actions[Action.ALL_IN] = self.stack
+                available_actions[Action.ALL_IN] = self.stack_size
 
         else:
             available_actions[Action.CHECK] = 0
 
-            if self.stack >= MIN_BET_AMOUNT:  # can afford min bet
-                available_actions[Action.BET] = (MIN_BET_AMOUNT, self.stack)
+            if self.stack_size >= MIN_BET_AMOUNT:  # can afford min bet
+                available_actions[Action.BET] = (MIN_BET_AMOUNT, self.stack_size)
             else:
-                available_actions[Action.ALL_IN] = self.stack
+                available_actions[Action.ALL_IN] = self.stack_size
 
         return available_actions
 
     def execute_action(self, action, add_bet):
         self.action = action
         self.total_bet += add_bet
-        self.stack -= add_bet
+        self.stack_size -= add_bet
 
         if action == Action.FOLD:
             self.hole_cards = []
@@ -70,9 +68,9 @@ class Player:
     def execute_post_blind(self):  # if blind amount >= player stack, player action is all-in
         blind_position = [position for position in self.positions if position in BLIND_POSITIONS].pop()
         blind_amount = BLIND_POS_TO_AMOUNT[blind_position]
-        bet_amount = min(blind_amount, self.stack)
+        bet_amount = min(blind_amount, self.stack_size)
 
-        if bet_amount == self.stack:
+        if bet_amount == self.stack_size:
             action = Action.ALL_IN
         else:
             action = Action.POST_BLIND
@@ -86,7 +84,7 @@ class Player:
         if isinstance(add_bet, tuple):
             add_bet = random.randint(add_bet[0], add_bet[1])
 
-        if add_bet == self.stack:
+        if add_bet == self.stack_size:
             action = Action.ALL_IN
 
         return action, add_bet
@@ -136,7 +134,7 @@ class PlayersManager:
             index = (index + 1) % number_of_players
             player = self.players[index]
 
-            if player.stack and player.action not in [Action.FOLD, Action.ALL_IN]:
+            if player.stack_size and player.action not in [Action.FOLD, Action.ALL_IN]:
                 return player
 
     def is_single_active_player(self):  # active means not folded or all-in and able to continue betting or acting
@@ -155,7 +153,7 @@ class PlayersManager:
         return False
 
     def get_players_with_stack(self):
-        return [player for player in self.players if player.stack]
+        return [player for player in self.players if player.stack_size]
 
     def is_single_player_with_stack(self):
         return len(self.get_players_with_stack()) == 1
@@ -168,7 +166,7 @@ class PlayersManager:
             index = (index + 1) % number_of_players
             player = self.players[index]
 
-            if player.stack:
+            if player.stack_size:
                 return player
 
     def get_positions(self):

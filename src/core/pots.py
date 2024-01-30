@@ -5,7 +5,7 @@ from .console_view import View
 class Pot:
     def __init__(self, eligible_players, name):
         self.name = name
-        self.amount = 0
+        self.size = 0
         self.eligible_players = eligible_players
         self.is_closed = False
 
@@ -38,7 +38,7 @@ class PotsManager:
 
             for player in players:
                 if player.action == Action.FOLD and player.total_bet:
-                    pot.amount += player.total_bet
+                    pot.size += player.total_bet
                     player.total_bet = 0
 
             betting_players = [player for player in players if player.total_bet]
@@ -46,7 +46,7 @@ class PotsManager:
 
             for player in betting_players:
                 player.total_bet -= smallest_bet
-                pot.amount += smallest_bet
+                pot.size += smallest_bet
 
             betting_players = [player for player in players if player.total_bet]
 
@@ -69,13 +69,13 @@ class PotsManager:
                 else:
                     player.action = Action.FOLD
 
-            split_pot, odd_chips = divmod(pot.amount, len(winners))
+            split_pot, odd_chips = divmod(pot.size, len(winners))
 
             for player in winners:
-                player.stack += split_pot
+                player.stack_size += split_pot
 
                 if odd_chips:  # TODO award odd chips starting with winner left of dealer
-                    player.stack += SMALLEST_CHIP_DENOMINATION_AMOUNT
+                    player.stack_size += SMALLEST_CHIP_DENOMINATION_AMOUNT
                     odd_chips -= SMALLEST_CHIP_DENOMINATION_AMOUNT
                     total_amount = split_pot + SMALLEST_CHIP_DENOMINATION_AMOUNT
                 else:

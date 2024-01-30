@@ -37,12 +37,12 @@ class GameManager:  # controller
             player.hand = self.evaluator.class_to_string(rank_class)
 
     def handle_action(self, bets):
-        acting_player = self.game_state.players_manager.acting_player
+        acting_player = self.game_state.players_manager.actor
 
         available_actions = acting_player.get_available_actions(bets, self.game_state.stage)
 
         if acting_player.is_human:
-            action, additional_bet = View.get_player_choice(available_actions, acting_player.stack)
+            action, additional_bet = View.get_player_choice(available_actions, acting_player.stack_size)
         else:
             action, additional_bet = acting_player.get_random_choice(available_actions)
         View.print_player_choice(action, additional_bet)
@@ -54,25 +54,25 @@ class GameManager:  # controller
     def start_betting_round(self):
         players_manager = self.game_state.players_manager
 
-        if players_manager.is_single_active_player():
+        if players_manager.is_single_player_active():
             return
 
         # initialize betting round
-        players_manager.acting_player = players_manager.get_first_acting_player(self.game_state.stage)
+        players_manager.actor = players_manager.get_first_acting_player(self.game_state.stage)
         bets = Bets(BIG_BLIND_AMOUNT if self.game_state.stage == Stage.PREFLOP else 0, 0)
 
         active_players = players_manager.get_active_players()
         players_manager.reset_actions(active_players)
 
-        while (players_manager.acting_player
-               and players_manager.acting_player.is_response_needed(bets.current)
-               and not players_manager.is_single_active_player()):
+        while (players_manager.actor
+               and players_manager.actor.is_response_needed(bets.current)
+               and not players_manager.is_single_player_active()):
             View.print_betting_history(bets)
-            View.print_player_info(players_manager.acting_player)
+            View.print_player_info(players_manager.actor)
 
             self.handle_action(bets)
 
-            players_manager.acting_player = players_manager.get_next_active_player(players_manager.acting_player)
+            players_manager.actor = players_manager.get_next_active_player(players_manager.actor)
 
     def start_showdown(self):
         players_manager = self.game_state.players_manager
@@ -101,8 +101,8 @@ class GameManager:  # controller
         players_with_stack = players_manager.get_players_with_stack()
         players_manager.reset_actions(players_with_stack)
         players_manager.reset_hole_cards()
-        self.game_state.pots_manager = PotsManager(players_with_stack)
-        pots_manager = self.game_state.pots_manager
+        pots_manager = PotsManager(players_with_stack)
+        self.game_state.pots_manager = pots_manager
         self.game_state.community_cards = []
         deck_manager = DeckManager()
 

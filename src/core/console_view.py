@@ -10,7 +10,7 @@ class View:
         if player.is_human:
             print('HOLE CARDS: ', end='')
             treys.Card.print_pretty_cards(player.hole_cards)
-        print(f'STACK: {player.stack}')
+        print(f'STACK: {player.stack_size}')
         print(f'BET: {player.total_bet}')
         print(f"ACTION: {player.action.value if player.action else 'None'}")
 
@@ -78,7 +78,7 @@ class View:
 
     @classmethod
     def print_pots(cls, pots):
-        print(f'POTS: {[pot.amount for pot in pots]}')
+        print(f'POTS: {[pot.size for pot in pots]}')
 
     @classmethod
     def print_community_cards(cls, community_cards):
@@ -99,7 +99,7 @@ class View:
 
     @classmethod
     def print_tournament_winner(cls, players):
-        print(f'==================== {[player.name for player in players if player.stack][0]} wins the Tournament! ====================')
+        print(f'==================== {[player.name for player in players if player.stack_size][0]} wins the Tournament! ====================')
 
     @classmethod
     def print_player_choice(cls, action, additional_bet):
