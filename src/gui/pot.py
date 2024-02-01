@@ -1,13 +1,17 @@
+import random
+
 import pyglet
 from src.gui.constants import POT_X, POT_Y
+from src.gui.resources import chip_stacking_sounds
 
 
 class PotLabel:
     def __init__(self, x, y, pot, batch):
         self.pot = pot
         self.name = pot.name
+        self.size = 0
 
-        self.pot_label = pyglet.text.Label(text=f'{pot.name}: {pot.size}',
+        self.pot_label = pyglet.text.Label(text=f'{pot.name}: {self.size}',
                                            font_size=24,
                                            bold=True,
                                            x=x, y=y,
@@ -16,7 +20,12 @@ class PotLabel:
                                            )
 
     def update(self):
-        self.pot_label.text = f'{self.name}: {self.pot.size}'
+        if self.size != self.pot.size:
+            # play chip stack sound
+            random.choice(chip_stacking_sounds).play()
+
+            self.size = self.pot.size
+            self.pot_label.text = f'{self.name}: ${self.size}'
 
 
 class PotLabels:
@@ -36,6 +45,7 @@ class PotLabels:
                                                          pot=pot,
                                                          batch=self.batch
                                                          )
+                    self.pot_labels[pot.name].update()
         else:
             for k, label in self.pot_labels.items():
                 self.pot_labels[k] = None

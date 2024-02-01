@@ -7,6 +7,7 @@ from src.gui.constants import WINDOW_WIDTH, WINDOW_HEIGHT, PLAYER_POSITIONS, OFF
 from src.gui.player import PlayerSprites
 from src.gui.pot import PotLabels
 from src.gui.card import CommunityCardSprites
+from src.gui.resources import chip_laying_sound
 
 
 class GameGraphics:
@@ -47,13 +48,20 @@ class GameGraphics:
         for player in self.game_state.players:
             # update dealer button
             if player is self.game_state.positions.dealer:
-                x, y = PLAYER_POSITIONS[self.game_state.players.index(player)]
-                self.button_sprite.x = WINDOW_WIDTH / 2 + (x - WINDOW_WIDTH / 2) * .5
-                self.button_sprite.y = WINDOW_HEIGHT / 2 + (y - WINDOW_HEIGHT / 2) * .6
+                player_x, player_y = PLAYER_POSITIONS[self.game_state.players.index(player)]
+                target_x = WINDOW_WIDTH / 2 + (player_x - WINDOW_WIDTH / 2) * .5
+                target_y = WINDOW_HEIGHT / 2 + (player_y - WINDOW_HEIGHT / 2) * .6
 
+                if self.button_sprite.x != target_x or self.button_sprite.y != target_y:
+                    # play chip laying sound
+                    chip_laying_sound.play()
+
+                    self.button_sprite.x = target_x
+                    self.button_sprite.y = target_y
+
+            # update actor frame
             if self.game_state.actor:
                 if player is self.game_state.actor:
-                    # update actor frame
                     self.frame_sprite.x, self.frame_sprite.y = PLAYER_POSITIONS[self.game_state.players.index(player)]
             else:
                 self.frame_sprite.y = OFF_SCREEN

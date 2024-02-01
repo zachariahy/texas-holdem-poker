@@ -3,6 +3,7 @@ from src.gui import resources
 import random
 import pyglet
 from src.gui.constants import COMMUNITY_CARDS_X, COMMUNITY_CARDS_Y
+from src.gui.resources import card_shoving_sounds, card_placing_sounds
 
 
 class CardSprite:
@@ -39,13 +40,19 @@ class CommunityCardSprites:
         if self.cards:
             for card_int in self.cards:
                 if card_int not in self.card_sprites:
+                    # play card placing sound
+                    random.choice(card_placing_sounds).play()
+
                     self.card_sprites[card_int] = CardSprite(card_int,
                                                              x=COMMUNITY_CARDS_X - self.cards.index(card_int) * 105,
                                                              y=COMMUNITY_CARDS_Y,
                                                              batch=self.batch
                                                              )
                     self.card_sprites[card_int].face_up()
-        else:
+        elif self.card_sprites:
+            # play card shoving sound
+            random.choice(card_shoving_sounds).play()
+
             for k, sprite in self.card_sprites.items():
                 sprite.delete()
             self.card_sprites.clear()

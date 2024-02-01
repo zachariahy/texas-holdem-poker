@@ -29,3 +29,5 @@ OFF_SCREEN = -400
 
 LAST_ACTION_X = 1550
 LAST_ACTION_Y = 130
+
+NAMES = ['Moose', 'Cracker', 'Tulip', 'Sofa', 'Nemo', 'Zoo', 'Sack', 'Ambulance', 'Sun']

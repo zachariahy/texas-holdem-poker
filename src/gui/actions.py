@@ -50,7 +50,7 @@ class ActionButtons:
                                               pressed=resources.gui_images['all-in-button'],
                                               depressed=resources.gui_images['all-in-button'],
                                               batch=batch)
-        all_in_button.set_handler('on_press', game_manager.all_in)
+        all_in_button.set_handler('on_press', self.on_all_in_press)
         self.action_buttons[Action.ALL_IN] = all_in_button
 
         self.slider = pyglet.gui.Slider(x=BUTTONS_X + 150, y=OFF_SCREEN,
@@ -126,6 +126,9 @@ class ActionButtons:
     def on_check_press(self):
         self.hide_slider()
         self.game_manager.check()
+
+    def on_all_in_press(self):
+        self.game_manager.all_in()
 
     def update(self):
         current_available_actions = self.game_manager.get_available_actions()

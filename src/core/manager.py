@@ -15,7 +15,6 @@ class GameManager:
         self.advance_stage_needed = False
         self.hole_cards_needed = False
         self.community_cards_needed = False
-        self.player_action_needed = None
 
     def deal_community_card(self):
         self.game_state.deck.draw(1)
@@ -27,7 +26,8 @@ class GameManager:
         sb_index = self.game_state.players.index(self.game_state.positions.small_blind)
         players = self.game_state.players[sb_index:] + self.game_state.players[:sb_index]
         players_in_hand_needing_cards = [player for player in players if
-                                         player.stack_size and len(player.hole_cards) != HOLE_CARD_COUNT]
+                                         (player.stack_size or player.total_bet) and len(
+                                             player.hole_cards) != HOLE_CARD_COUNT]
 
         if not players_in_hand_needing_cards:
             self.hole_cards_needed = False
@@ -44,6 +44,12 @@ class GameManager:
             player.hole_cards.extend(card)
             return
 
+    def does_actor_have_option(self):
+        is_actor_facing_raise = self.game_state.bets.last
+        return (self.game_state.is_preflop_stage()
+                          and self.game_state.actor is self.game_state.positions.big_blind
+                          and not is_actor_facing_raise)
+
     def get_available_actions(self):
         if self.game_state.actor is None:
             return
@@ -53,32 +59,30 @@ class GameManager:
         total_bet = self.game_state.actor.total_bet
 
         min_raise = 2 * bets.current - bets.last
-        facing_bet = bets.current
-        facing_raise = bets.last
-        has_the_option = (self.game_state.is_preflop_stage()
-                          and self.game_state.actor is self.game_state.positions.big_blind
-                          and not facing_raise)
+        is_actor_facing_bet = bets.current
 
         available_actions = {}
 
-        if has_the_option:
+        if self.does_actor_have_option():
             available_actions[Action.CHECK] = 0
 
-            if stack_size >= min_raise - total_bet:  # can afford difference
-                available_actions[Action.RAISE] = (min_raise - total_bet, stack_size)
-            else:
-                available_actions[Action.ALL_IN] = stack_size
+            if not self.game_state.is_less_two_active_players():
+                if stack_size >= min_raise - total_bet:  # can afford difference
+                    available_actions[Action.RAISE] = (min_raise - total_bet, stack_size)
+                else:
+                    available_actions[Action.ALL_IN] = stack_size
 
-        elif facing_bet:
+        elif is_actor_facing_bet:
             available_actions[Action.FOLD] = 0
 
             if stack_size >= bets.current - total_bet:  # can afford difference
                 available_actions[Action.CALL] = bets.current - total_bet
 
-            if stack_size >= min_raise - total_bet:  # can afford difference
-                available_actions[Action.RAISE] = (min_raise - total_bet, stack_size)
-            elif bets.current - total_bet != stack_size:
-                available_actions[Action.ALL_IN] = stack_size
+            if not self.game_state.is_less_two_active_players():
+                if stack_size >= min_raise - total_bet:  # can afford difference
+                    available_actions[Action.RAISE] = (min_raise - total_bet, stack_size)
+                elif bets.current - total_bet != stack_size:  # if call and all-in not the same
+                    available_actions[Action.ALL_IN] = stack_size
 
         else:
             available_actions[Action.CHECK] = 0
@@ -130,7 +134,8 @@ class GameManager:
         number_of_players = len(self.game_state.players)
 
         # for offset in range(1, number_of_players - 1):
-        for offset in range(1, number_of_players):
+        # for offset in range(1, number_of_players):
+        for offset in range(1, number_of_players + 1):
             next_actor_index = (current_actor_index + offset) % number_of_players
             next_actor = self.game_state.players[next_actor_index]
 
@@ -173,9 +178,6 @@ class GameManager:
         self.game_state.hand_results.clear()
 
         for pot in reversed(self.game_state.pots):
-            # TODO award odd chips starting with winner left of dealer -> order eligible players, starting with
-            #  player closest to the left of the dealer
-
             eligible_players_not_folded = [player for player in pot.eligible_players if not player.is_folded()]
             strongest_hand = min([player.hand_strength for player in eligible_players_not_folded])
 
@@ -219,8 +221,17 @@ class GameManager:
         self.rotate_actor()
 
     def is_round_over(self):
-        return (not self.game_state.actor or not self.game_state.actor.is_response_needed(self.game_state.bets.current)
-                or self.game_state.is_single_player_active())
+        # (OR no_actor,
+        #     (AND actor.total_bet == current_bet,
+        #          (OR actor_already_acted,
+        #              no_other_active_players)),
+        #     (AND actor_has_option
+        #          under_two_active_players))
+        return (not self.game_state.actor or
+                (self.game_state.actor.total_bet == self.game_state.bets.current and
+                 (self.game_state.actor.has_acted() or
+                  self.game_state.is_less_two_active_players())) or
+                self.does_actor_have_option() and self.game_state.is_less_two_active_players())
 
     def advance_stage(self):
         self.advance_stage_needed = False
@@ -253,7 +264,7 @@ class GameManager:
 
     def start_main_stage(self):
         self.community_cards_needed = True
-        if self.game_state.is_single_player_active():
+        if self.game_state.is_less_two_active_players():
             self.advance_stage_needed = True
         else:
             self.start_round()
@@ -379,7 +390,7 @@ class GameManager:
             if self.game_state.actor.action in [Action.FOLD, Action.CHECK]:
                 action = f'{self.game_state.actor.name} {self.game_state.actor.action.value.lower()}s.'
             elif self.game_state.actor.is_all_in():
-                action = f'{self.game_state.actor.name} goes all-in!'
+                action = f'{self.game_state.actor.name} goes all-in! (${self.game_state.actor.total_bet})'
             elif self.game_state.actor.action == Action.RAISE:
                 action = f'{self.game_state.actor.name} raises to ${self.game_state.actor.total_bet}.'
             else:
@@ -387,13 +398,11 @@ class GameManager:
             self.game_state.last_action = action
 
     def update(self, dt):
-        if self.hole_cards_needed or self.community_cards_needed:   # or human action needed
+        if self.hole_cards_needed or self.community_cards_needed:
             return
 
         elif self.game_state.actor and not self.game_state.actor.is_human:
             self.bot_act()
-
-        # TODO put betting round loop into update()
 
         elif self.advance_stage_needed:
             self.advance_stage()

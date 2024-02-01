@@ -37,8 +37,8 @@ class GameState:
     def is_headsup(self):
         return sum(1 for player in self.players if player.stack_size) == 2
 
-    def is_single_player_active(self):
-        return sum(1 for player in self.players if player.is_active()) == 1
+    def is_less_two_active_players(self):
+        return sum(1 for player in self.players if player.is_active()) < 2
 
     def is_single_player_not_folded(self):
         return sum(1 for player in self.players if not player.is_folded()) == 1
@@ -69,8 +69,8 @@ class PlayerState:
     def is_all_in(self):
         return self.action == Action.ALL_IN
 
-    def is_response_needed(self, current_bet):
-        return self.action in [None, Action.POST_BLIND] or self.total_bet < current_bet
+    def has_acted(self):
+        return self.action not in [None, Action.POST_BLIND]
 
     def move_chips(self, add_bet):
         self.total_bet += add_bet

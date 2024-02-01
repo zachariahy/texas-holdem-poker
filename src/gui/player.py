@@ -1,3 +1,5 @@
+import random
+
 import pyglet
 
 from src.core.constants import Action
@@ -5,6 +7,8 @@ from src.gui import load
 from random import randint
 from src.gui.card import CardSprite
 from src.gui.constants import PLAYER_POSITIONS, OFF_SCREEN
+from src.gui.resources import card_shoving_sounds, chip_stacking_sounds, chip_shoving_sound, tapping_sounds, \
+    elimination_sound
 
 
 class PlayerSprite:
@@ -12,6 +16,7 @@ class PlayerSprite:
         self.player = player
         self.x, self.y = x, y
         self.batch = batch
+        self.stack_size = player.stack_size
 
         self.name_x, self.name_y = x + 70, y + 90
         self.chip_x, self.chip_y = x - 80, y + 50
@@ -56,21 +61,42 @@ class PlayerSprite:
     def update(self):
         # name
         if not self.player.total_bet and not self.player.stack_size and self.player.action != Action.ALL_IN:
-            self.name_label.x = OFF_SCREEN
+            if self.name_label.x != OFF_SCREEN:
+                # play elimination sound
+                elimination_sound.play()
+
+                self.name_label.x = OFF_SCREEN
         else:
             self.name_label.x = self.name_x
 
         # stack
-        if self.player.stack_size:
-            self.stack_size_label.text = f'${str(self.player.stack_size)}'
-            self.chip_sprite.x = self.chip_x
-        else:
-            self.stack_size_label.text = ''
-            self.chip_sprite.x = OFF_SCREEN
+        if self.stack_size != self.player.stack_size:
+            # play chip stack sound
+            if self.stack_size < self.player.stack_size:
+                random.choice(chip_stacking_sounds).play()
+
+            self.stack_size = self.player.stack_size
+
+            if self.player.stack_size:
+                self.stack_size_label.text = f'${str(self.stack_size)}'
+                self.chip_sprite.x = self.chip_x
+            else:
+                self.stack_size_label.text = ''
+                self.chip_sprite.x = OFF_SCREEN
 
         # action
         if self.player.action not in [None, Action.POST_BLIND] and (self.player.stack_size or self.player.hole_cards):
-            self.action_label.text = self.player.action.value
+            if self.action_label.text != self.player.action.value:
+                # play action sound (except folding)
+                if self.player.action in [Action.BET, Action.RAISE, Action.CALL]:
+                    random.choice(chip_stacking_sounds).play()
+                elif self.player.action == Action.CHECK:
+                    random.choice(tapping_sounds).play()
+                    pyglet.clock.schedule_once(lambda dt: random.choice(tapping_sounds).play(), 1 / 5)
+                elif self.player.action == Action.ALL_IN:
+                    chip_shoving_sound.play()
+
+                self.action_label.text = self.player.action.value
         else:
             self.action_label.text = ''
 
@@ -78,6 +104,9 @@ class PlayerSprite:
         if self.player.hole_cards:
             for card_int in self.player.hole_cards:
                 if card_int not in self.card_sprites:
+                    # play card shoving sound
+                    random.choice(card_shoving_sounds).play()
+
                     self.card_sprites[card_int] = CardSprite(card_int,
                                                              x=self.card_x + self.player.hole_cards.index(
                                                                  card_int) * 25,
@@ -90,7 +119,10 @@ class PlayerSprite:
                     self.card_sprites[card_int].face_up()
                 else:
                     self.card_sprites[card_int].face_down()
-        else:
+        elif self.card_sprites:
+            # play card shoving sound
+            random.choice(card_shoving_sounds).play()
+
             for k, sprite in self.card_sprites.items():
                 sprite.delete()
             self.card_sprites.clear()
