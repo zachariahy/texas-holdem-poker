@@ -49,7 +49,7 @@ class PokerWindow(pyglet.window.Window):
 
         # add players
         names = NAMES
-        for _ in range(0, 7):
+        for _ in range(0, 5):
             random_name = random.choice(names)
             names.remove(random_name)
             self.game_state.add_player(random_name, False)
@@ -80,13 +80,13 @@ class PokerWindow(pyglet.window.Window):
                 self.prompting_label.text = '(Game Over)'
                 self.prompting_label.draw()
         elif not self.game_state.in_hand:
-            self.game_manager.start_hand()
+            # self.game_manager.start_hand()
 
-            # self.overlay.draw()
-            # self.prompting_label.text = '(Press \'Space\' to Start a Hand)'
-            # self.prompting_label.draw()
-            # if self.game_state.hand_results:
-            #     self.draw_hand_results_labels()
+            self.overlay.draw()
+            self.prompting_label.text = '(Press \'Space\' to Start a Hand)'
+            self.prompting_label.draw()
+            if self.game_state.hand_results:
+                self.draw_hand_results_labels()
 
     def on_key_press(self, symbol, modifiers):
         if self.game_over:
@@ -108,32 +108,3 @@ if __name__ == '__main__':
     pyglet.clock.schedule_interval(window.game_manager.deal, 1 / 30)
     pyglet.clock.schedule_interval(window.game_manager.update, 1)
     pyglet.app.run()
-
-# TODO other game mechanics fixes
-# award odd chips in proper order, starting with winner left of dealer
-#   order eligible players, starting with player closest to the left of the dealer
-
-# TODO GUI fixes and enhancements
-# FIX sound of action not playing when new action same as previous (no change)
-# add depressed image to buttons
-# add sounds when buttons pressed
-# add sound for burn card before dealing community cards
-# FIX player frame covering dealer button
-# flip player cards AFTER dealing
-# support small adjustments with the slider
-
-# TODO bot feature
-# create bot class that only has access to its player info and the game manager, whose methods the bot will call to act
-# add AI for strategic play
-# give AI voices to call out actions in their voice
-
-# TODO other new features
-# add motion to game elements
-# setup menu
-#   select single hand or tournament
-#   select number of bots and humans
-# put human in bottom center position at table if one human and over 4 bots, else random placement
-# evenly distribute bots around table
-# display winning hand after round
-# after human loses, ask if quit or continue watching the tournament or quit (enter vs watch hand prompt label)
-# if multiple human players, obscure view between turns for privacy (like Polytopia)

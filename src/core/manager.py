@@ -47,8 +47,8 @@ class GameManager:
     def does_actor_have_option(self):
         is_actor_facing_raise = self.game_state.bets.last
         return (self.game_state.is_preflop_stage()
-                          and self.game_state.actor is self.game_state.positions.big_blind
-                          and not is_actor_facing_raise)
+                and self.game_state.actor is self.game_state.positions.big_blind
+                and not is_actor_facing_raise)
 
     def get_available_actions(self):
         if self.game_state.actor is None:
@@ -390,7 +390,7 @@ class GameManager:
             if self.game_state.actor.action in [Action.FOLD, Action.CHECK]:
                 action = f'{self.game_state.actor.name} {self.game_state.actor.action.value.lower()}s.'
             elif self.game_state.actor.is_all_in():
-                action = f'{self.game_state.actor.name} goes all-in! (${self.game_state.actor.total_bet})'
+                action = f'{self.game_state.actor.name} goes all-in for ${self.game_state.actor.total_bet}!)'
             elif self.game_state.actor.action == Action.RAISE:
                 action = f'{self.game_state.actor.name} raises to ${self.game_state.actor.total_bet}.'
             else:
