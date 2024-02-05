@@ -33,7 +33,7 @@ ACTION_STR_TO_ENUM = {'fold': Action.FOLD,
                       'all-in': Action.ALL_IN
                       }
 
-HOLE_CARD_NUMBER = 2
+HOLE_CARD_COUNT = 2
 
 SMALLEST_CHIP_DENOMINATION_AMOUNT = 1
 SMALL_BLIND_AMOUNT = 1

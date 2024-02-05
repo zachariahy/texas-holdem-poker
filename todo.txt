@@ -1,0 +1,29 @@
+# TODO GUI
+# FIX sound of action not playing when new action same as previous (no change)
+# FIX player frame covering dealer button
+# add depressed image to buttons
+# add sounds when buttons pressed
+
+# TODO bot feature
+# create bot class that only has access to its player info and the game manager, whose methods the bot will call to act
+# add AI for strategic play
+# give AI voices to call out actions in their voice
+
+# TODO game mechanics
+# award odd chips in proper order, starting with winner left of dealer
+#   order eligible players, starting with player closest to the left of the dealer
+
+# TODO other
+# add motion to game elements
+# support small adjustments with the slider
+# add sound for burn card before dealing community cards
+# flip player cards AFTER dealing
+# remove pot label if zero
+# display winning hand after round
+# setup menu
+#   select single hand or tournament
+#   select number of bots and humans
+# put human in bottom center position at table if one human and over 4 bots, else random placement
+# evenly distribute bots around table
+# after human loses, ask if quit or continue watching the tournament or quit (enter vs watch hand prompt label)
+# if multiple human players, obscure view between turns for privacy (like Polytopia)
