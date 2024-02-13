@@ -390,7 +390,7 @@ class GameManager:
             if self.game_state.actor.action in [Action.FOLD, Action.CHECK]:
                 action = f'{self.game_state.actor.name} {self.game_state.actor.action.value.lower()}s.'
             elif self.game_state.actor.is_all_in():
-                action = f'{self.game_state.actor.name} goes all-in for ${self.game_state.actor.total_bet}!)'
+                action = f'{self.game_state.actor.name} goes all-in for ${self.game_state.actor.total_bet}!'
             elif self.game_state.actor.action == Action.RAISE:
                 action = f'{self.game_state.actor.name} raises to ${self.game_state.actor.total_bet}.'
             else:
