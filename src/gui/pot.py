@@ -1,5 +1,4 @@
 import random
-
 import pyglet
 from src.gui.constants import POT_X, POT_Y
 from src.gui.resources import chip_stacking_sounds

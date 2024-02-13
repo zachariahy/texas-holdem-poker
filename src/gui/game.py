@@ -1,7 +1,5 @@
 from random import randint
-
 import pyglet
-
 from src.gui import load
 from src.gui.constants import WINDOW_WIDTH, WINDOW_HEIGHT, PLAYER_POSITIONS, OFF_SCREEN, LAST_ACTION_X, LAST_ACTION_Y
 from src.gui.player import PlayerSprites

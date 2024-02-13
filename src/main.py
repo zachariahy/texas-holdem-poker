@@ -1,5 +1,4 @@
 import random
-
 import pyglet
 from gui import resources
 from src.core.state import GameState

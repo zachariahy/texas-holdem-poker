@@ -1,7 +1,5 @@
 import random
-
 import pyglet
-
 from src.core.constants import Action
 from src.gui import load
 from random import randint
